@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Flower Catcher 🌸</title>
+
+<style>
+body {
+    margin: 0;
+    overflow: hidden;
+    background: linear-gradient(#ffe6f2, #fff0f8);
+    font-family: "Comic Sans MS", cursive;
+}
+
+#score {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    font-size: 24px;
+    color: #ff4d94;
+    font-weight: bold;
+}
+
+#timer {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    font-size: 24px;
+    color: #ff4d94;
+    font-weight: bold;
+}
+
+#basket {
+    position: absolute;
+    bottom: 20px;
+    width: 90px;
+    height: 60px;
+    font-size: 50px;
+    text-align: center;
+}
+
+.item {
+    position: absolute;
+    font-size: 35px;
+}
+
+#gameOver {
+    display: none;
+    position: absolute;
+    width: 100%;
+    top: 40%;
+    text-align: center;
+    font-size: 40px;
+    color: #ff4d94;
+}
+</style>
+</head>
+<body>
+
+<div id="score">Score: 0</div>
+<div id="timer">60</div>
+
+<div id="basket">🧺</div>
+
+<div id="gameOver"></div>
+
+<script>
+let score = 0;
+let timeLeft = 60;
+
+const basket = document.getElementById("basket");
+const scoreText = document.getElementById("score");
+const timerText = document.getElementById("timer");
+const gameOver = document.getElementById("gameOver");
+
+let basketX = window.innerWidth / 2;
+basket.style.left = basketX + "px";
+
+document.addEventListener("mousemove", (e) => {
+    basketX = e.clientX;
+    basket.style.left = basketX - 45 + "px";
+});
+
+document.addEventListener("touchmove", (e) => {
+    basketX = e.touches[0].clientX;
+    basket.style.left = basketX - 45 + "px";
+});
+
+function createItem() {
+    const item = document.createElement("div");
+    item.classList.add("item");
+
+    const isHeart = Math.random() < 0.2;
+
+    item.innerHTML = isHeart ? "💖" : "🌸";
+    item.dataset.points = isHeart ? 5 : 1;
+
+    item.style.left = Math.random() * (window.innerWidth - 40) + "px";
+    item.style.top = "-40px";
+
+    document.body.appendChild(item);
+
+    let y = -40;
+
+    const fall = setInterval(() => {
+        y += 4;
+        item.style.top = y + "px";
+
+        const basketRect = basket.getBoundingClientRect();
+        const itemRect = item.getBoundingClientRect();
+
+        if (
+            itemRect.bottom >= basketRect.top &&
+            itemRect.left < basketRect.right &&
+            itemRect.right > basketRect.left
+        ) {
+            score += Number(item.dataset.points);
+            scoreText.innerHTML = "Score: " + score;
+            item.remove();
+            clearInterval(fall);
+        }
+
+        if (y > window.innerHeight) {
+            item.remove();
+            clearInterval(fall);
+        }
+    }, 20);
+}
+
+const spawn = setInterval(createItem, 700);
+
+const timer = setInterval(() => {
+    timeLeft--;
+    timerText.innerHTML = timeLeft;
+
+    if (timeLeft <= 0) {
+        clearInterval(timer);
+        clearInterval(spawn);
+
+        document.querySelectorAll(".item").forEach(i => i.remove());
+
+        gameOver.style.display = "block";
+        gameOver.innerHTML =
+            `🌸 Game Over 🌸<br>Final Score: ${score}<br><br>You're amazing! 💖`;
+    }
+}, 1000);
+</script>
+
+</body>
+</html>
